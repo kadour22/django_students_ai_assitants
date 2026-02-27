@@ -10,7 +10,7 @@ class Document_Serializer(serializers.ModelSerializer):
         if value.content_type != "application/pdf":
             raise serializers.ValidationError("Only PDF files are allowed.")
 
-        if value.size > 5 * 1024 * 1024:  # 5MB limit
+        if value.size > 5 * 1024 * 1024:  
             raise serializers.ValidationError("File size must be under 5MB.")
 
         return value
