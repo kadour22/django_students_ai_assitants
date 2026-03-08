@@ -11,10 +11,17 @@ class DocumentAPIView(APIView) :
         super().__init__(*args, **kwargs)
         self.document_service = DocumentService()
     
-    def get(self, request) :
-        documents = self.document_service.get_all_documents()
-        serializer = DocumentList_Serializer(documents, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, document_id=None) :
+        if document_id:
+            document = self.document_service.get_document_by_id(document_id)
+            if document:
+                serializer = Document_Serializer(document)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"detail": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            documents = self.document_service.get_all_documents()
+            serializer = DocumentList_Serializer(documents, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request) :
         serializer = Document_Serializer(data=request.data)
@@ -26,4 +33,3 @@ class DocumentAPIView(APIView) :
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
