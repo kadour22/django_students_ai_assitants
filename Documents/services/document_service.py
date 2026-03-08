@@ -44,12 +44,12 @@ class DocumentService(BaseService) :
         except Document.DoesNotExist:
             return None
     
-    # def delete_document(self, document_id: int) -> bool:
-    #     try:
-    #         document = Document.objects.get(id=document_id)
-    #         document.delete()
-    #         self.delete_cache_pattern('all_documents*')
-    #         self.delete_cache_pattern(f'document_id:{document_id}*')
-    #         return True
-    #     except Document.DoesNotExist:
-    #         return False
+    def delete_document(self, document_id: int) -> bool:
+        try:
+            document = Document.objects.get(id=document_id)
+            document.delete()
+            self.delete_cache_pattern('all_documents*')
+            self.delete_cache_pattern(f'document_id:{document_id}*')
+            return True
+        except Document.DoesNotExist:
+            return False
