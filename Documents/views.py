@@ -1,10 +1,29 @@
-# views.py
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import  status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Document
-from .serializers import DocumentSerializer
+from .serializers import Document_Serializer,DocumentList_Serializer
+from Documents.services.document_service import DocumentService
 
-class DocumentViewSet(ModelViewSet):
-    queryset = Document.objects.all().order_by('-uploaded_at')
-    serializer_class = DocumentSerializer
-    parser_classes = [MultiPartParser, FormParser]
+class DocumentAPIView(APIView) :
+
+    def __init__(self,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.document_service = DocumentService()
+    
+    def get(self, request) :
+        documents = self.document_service.get_all_documents()
+        serializer = DocumentList_Serializer(documents, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request) :
+        serializer = Document_Serializer(data=request.data)
+        if serializer.is_valid():
+            title = serializer.validated_data['title']
+            pdf_file = serializer.validated_data['pdf']
+            document = self.document_service.create_document(title, pdf_file)
+            response_serializer = Document_Serializer(document)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
