@@ -53,3 +53,6 @@ class DocumentService(BaseService) :
             return True
         except Document.DoesNotExist:
             return False
+
+    def generate_resume(self, document_id: int) -> Optional[str]:
+        pass

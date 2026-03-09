@@ -3,8 +3,6 @@ import os
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from Documents.Agent.AI import AI
 from Documents.utils import extract_text_from_pdf
 from .models import Document
 from .serializers import Document_Serializer, DocumentList_Serializer
@@ -47,7 +45,7 @@ class DocumentAPIView(APIView):
 
 
 class DocumentGenerateAPIView(APIView):
-    """Generate a resume + quiz from an existing uploaded PDF document."""
+    """Generate a resume (and optionally a quiz) from an uploaded PDF document."""
 
     def post(self, request, document_id):
         try:
@@ -62,16 +60,23 @@ class DocumentGenerateAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Generate content using the AI helper
-        ai = AI(api_key=os.getenv("OPENAI_API_KEY"))
-        resume = ai.generate_resume(raw_text)
-        quiz = ai.generate_quiz(raw_text)
+        try:
+            resume = generate_resume(raw_text)
+        except OpenAIError as e:
+            return Response(
+                {"detail": "Error generating resume.", "error": str(e)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except Exception as e:
+            return Response(
+                {"detail": "Unexpected error generating resume.", "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
                 "resume": resume,
-                "quiz": quiz,
             },
             status=status.HTTP_200_OK,
         )
-
+    
