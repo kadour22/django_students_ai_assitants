@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 key = os.getenv("OPENAI_APIKEY")
-response = requests.post(
+
+def call(text:str):
+    response = requests.post(
     url="https://openrouter.ai/api/v1/chat/completions",
     headers={
         "Authorization":f"Bearer {key}",
@@ -16,13 +18,14 @@ response = requests.post(
     "messages": [
         {
           "role": "user",
-          "content": "How many r's are in the word 'strawberry'?"
+          "content": f"Your are an agent that pro resume for students using this text : {text}"
         }
       ],
     "reasoning": {"enabled": True}
   })
 
-)
-response = response.json()
-response = response['choices'][0]['message']
-print(response)
+    )
+    response = response.json()
+    response = response['choices'][0]['message']
+    print(response)
+    return response

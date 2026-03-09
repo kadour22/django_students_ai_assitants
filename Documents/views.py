@@ -44,39 +44,4 @@ class DocumentAPIView(APIView):
         return Response({"detail": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
-class DocumentGenerateAPIView(APIView):
-    """Generate a resume (and optionally a quiz) from an uploaded PDF document."""
-
-    def post(self, request, document_id):
-        try:
-            document = Document.objects.get(id=document_id)
-        except Document.DoesNotExist:
-            return Response({"detail": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        raw_text = extract_text_from_pdf(document.pdf.path)
-        if not raw_text.strip():
-            return Response(
-                {"detail": "Unable to extract text from PDF."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            resume = generate_resume(raw_text)
-        except OpenAIError as e:
-            return Response(
-                {"detail": "Error generating resume.", "error": str(e)},
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
-        except Exception as e:
-            return Response(
-                {"detail": "Unexpected error generating resume.", "error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        return Response(
-            {
-                "resume": resume,
-            },
-            status=status.HTTP_200_OK,
-        )
     
