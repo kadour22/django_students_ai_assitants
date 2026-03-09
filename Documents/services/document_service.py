@@ -2,10 +2,12 @@ from typing import Optional, List, Dict, Any
 from django.db.models import Count, Q
 from django.core.cache import cache
 from django.db import models
-
+from Documents.Agent.AI import call
+from Documents.utils import extract_text_from_pdf
+from Documents.utils import chunk_text
 from Documents.base.base_service import BaseService
 from Documents.models import Document
-
+from django.shortcuts import get_object_or_404
 class DocumentService(BaseService) :
 
     def __init__(self):
@@ -55,4 +57,8 @@ class DocumentService(BaseService) :
             return False
 
     def generate_resume(self, document_id: int) -> Optional[str]:
-        pass
+        document = get_object_or_404(Document, id=document_id)
+        text = extract_text_from_pdf(document.pdf.path)
+        chunks = chunk_text(text)
+        resume = call(chunks)
+        return resume
