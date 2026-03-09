@@ -1,7 +1,9 @@
 import os
 import json 
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 key = os.getenv("OPENAI_APIKEY")
 response = requests.post(
     url="https://openrouter.ai/api/v1/chat/completions",
